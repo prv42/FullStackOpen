@@ -1,27 +1,10 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
 
-const Filter = ({ value, onChange }) => <div>filter shown with <input value={value} onChange={onChange} /></div>
+import Filter from './components/Filter'
+import PersonForm from './components/PersonForm'
+import Persons from './components/Persons'
 
-const PersonForm = ({ onSubmit, nameValue, numberValue, onNameChange, onNumberChange}) => {
-  return (
-    <form onSubmit={onSubmit}>
-      <div>
-        name: <input value={nameValue} onChange={onNameChange} />
-      </div>
-      <div>
-        number: <input value={numberValue} onChange={onNumberChange} />
-      </div>
-      <div>
-        <button type="submit">add</button>
-      </div>
-    </form>
-  )
-}
-
-const Person = ({ person }) => <div>{person.name} {person.number}</div>
-
-const Persons = ({ persons }) => persons.map(person => <Person key={person.id} person={person} />)
+import personService from './services/persons'
 
 const App = () => {
   const [persons, setPersons] = useState([])
@@ -30,9 +13,9 @@ const App = () => {
   const [filter, setFilter] = useState("")
 
   useEffect(() => {
-    axios
-      .get("http://localhost:3001/persons")
-      .then(response => setPersons(response.data))
+    personService
+      .getAll()
+      .then(initialPersons => setPersons(initialPersons))
   }, [])
 
   const addNewPerson = (event) => {
@@ -50,10 +33,10 @@ const App = () => {
       number: newNumber,
     }
 
-    axios
-      .post("http://localhost:3001/persons", personObject)
-      .then(response => {
-        setPersons(prev => prev.concat(response.data))
+    personService
+      .create(personObject)
+      .then(returnedPerson => {
+        setPersons(prev => prev.concat(returnedPerson))
         setNewName("")
         setNewNumber("")
       })
