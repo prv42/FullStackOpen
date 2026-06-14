@@ -1,5 +1,11 @@
-const Person = ({ person }) => <div>{person.name} {person.number}</div>
+const Person = ({ person, onDelete }) => {
+  return (
+    <div>
+      {person.name} {person.number} <button onClick={() => onDelete(person)}>delete</button>
+    </div>
+  )
+}
 
-const Persons = ({ persons }) => persons.map(person => <Person key={person.id} person={person} />)
+const Persons = ({ persons, onDelete }) => persons.map(person => <Person key={person.id} person={person} onDelete={onDelete} />)
 
 export default Persons
