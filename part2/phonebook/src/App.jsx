@@ -23,18 +23,26 @@ const App = () => {
 
     if (!newName.trim() || !newNumber.trim()) return
 
-    if (persons.some(person => person.name === newName)) {
-      alert(`${newName} is already added to phonebook`)
+    const person = persons.find(person => person.name === newName)
+
+    if (person) {
+      if (person.number === newNumber) {
+        alert(`${newName} is already added to phonebook`)
+      } else if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+        personService
+          .update(person.id, { ...person, number: newNumber })
+          .then(returnedPerson => {
+            setPersons(prev => prev.map(p => p.id === person.id ? returnedPerson : p))
+            setNewName("")
+            setNewNumber("")
+          })
+          .catch(() => setPersons(prev => prev.filter(p => p.id !== person.id)))
+      }
       return
     }
 
-    const personObject = {
-      name: newName,
-      number: newNumber,
-    }
-
     personService
-      .create(personObject)
+      .create({ name: newName, number: newNumber })
       .then(returnedPerson => {
         setPersons(prev => prev.concat(returnedPerson))
         setNewName("")
@@ -45,7 +53,7 @@ const App = () => {
   const handleNameChange = event => setNewName(event.target.value)
   const handleNumberChange = event => setNewNumber(event.target.value)
   const handleFilterChange = event => setFilter(event.target.value)
-  
+
   const handleDelete = person => {
     if (window.confirm(`Delete ${person.name} ?`)) {
       personService
