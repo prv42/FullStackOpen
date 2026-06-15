@@ -12,7 +12,7 @@ const App = () => {
   const [newName, setNewName] = useState("")
   const [newNumber, setNewNumber] = useState("")
   const [filter, setFilter] = useState("")
-  const [successMessage, setSuccessMessage] = useState(null)
+  const [notificationMessage, setNotificationMessage] = useState({content: null, type: null })
 
   useEffect(() => {
     personService
@@ -20,10 +20,10 @@ const App = () => {
       .then(initialPersons => setPersons(initialPersons))
   }, [])
 
-  const showNotification = message => {
-    setSuccessMessage(message)
+  const showNotification = (content, type) => {
+    setNotificationMessage({ content, type })
     setTimeout(() => {
-      setSuccessMessage(null)
+      setNotificationMessage({content: null, type: null })
     }, 5000)
   }
 
@@ -44,9 +44,12 @@ const App = () => {
             setPersons(prev => prev.map(p => p.id === person.id ? returnedPerson : p))
             setNewName("")
             setNewNumber("")
-            showNotification(`Updated ${returnedPerson.name}`)
+            showNotification(`Updated ${returnedPerson.name}`, "success")
           })
-          .catch(() => setPersons(prev => prev.filter(p => p.id !== person.id)))
+          .catch(() => {
+            setPersons(prev => prev.filter(p => p.id !== person.id))
+            showNotification(`Information of ${person.name} has already been removed from server`, "error")
+          })
       }
       return
     }
@@ -57,7 +60,7 @@ const App = () => {
         setPersons(prev => prev.concat(returnedPerson))
         setNewName("")
         setNewNumber("")
-        showNotification(`Added ${returnedPerson.name}`)
+        showNotification(`Added ${returnedPerson.name}`, "success")
       })
   }
 
@@ -78,7 +81,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={successMessage} />
+      <Notification message={notificationMessage} />
       <Filter value={filter} onChange={handleFilterChange} />
       <h2>add a new</h2>
       <PersonForm onSubmit={addNewPerson} nameValue={newName} numberValue={newNumber} onNameChange={handleNameChange} onNumberChange={handleNumberChange} />
