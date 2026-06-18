@@ -1,4 +1,6 @@
 const express = require("express")
+const morgan = require("morgan")
+
 const app = express()
 
 let persons = [
@@ -31,6 +33,7 @@ const generateId = () => {
   return String(maxId + 1)
 }
 
+app.use(morgan("tiny"))
 app.use(express.json())
 
 app.get("/api/persons", (request, response) => {
