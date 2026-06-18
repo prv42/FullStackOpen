@@ -24,8 +24,30 @@ let persons = [
   }
 ]
 
+const generateId = () => {
+  const maxId = persons.length > 0
+    ? Math.max(...persons.map(p => p.id))
+    : 0
+  return String(maxId + 1)
+}
+
+app.use(express.json())
+
 app.get("/api/persons", (request, response) => {
   response.json(persons)
+})
+
+app.post("/api/persons", (request, response) => {
+  const body = request.body
+
+  const person = {
+    "id": generateId(),
+    "name": body.name, 
+    "number": body.number,
+  }
+
+  persons.push(person)
+  response.status(201).json(person)
 })
 
 app.get("/api/persons/:id", (request, response) => {
