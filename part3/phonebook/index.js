@@ -28,13 +28,6 @@ let persons = [
   }
 ]
 
-const generateId = () => {
-  const maxId = persons.length > 0
-    ? Math.max(...persons.map(p => p.id))
-    : 0
-  return String(maxId + 1)
-}
-
 morgan.token("body", (req) => {
   return req.method === "POST" ? JSON.stringify(req.body) : ""
 })
@@ -54,16 +47,15 @@ app.post("/api/persons", (request, response) => {
 
   if (!body.name) return response.status(400).json({ error: "name missing" })
   if (!body.number) return response.status(400).json({ error: "number missing" })
-  if (persons.some(person => person.name === body.name)) return response.status(400).json({ error: "name must be unique" })
 
-  const person = {
-    "id": generateId(),
-    "name": body.name, 
-    "number": body.number,
-  }
+  const person = new Person({
+    name: body.name, 
+    number: body.number,
+  })
 
-  persons.push(person)
-  response.status(201).json(person)
+  person.save().then(savedPerson => {
+    response.status(201).json(savedPerson)
+  })
 })
 
 app.get("/api/persons/:id", (request, response) => {
