@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
+    "lint": "eslint .",
     "build:ui": "rm -rf dist && cd ../../part2/phonebook && npm run build && cp -r dist ../../part3/phonebook",
     "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push"
   },
@@ -16,5 +17,11 @@
     "express": "^5.2.1",
     "mongoose": "^9.7.1",
     "morgan": "^1.11.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "eslint": "^10.5.0",
+    "globals": "^17.7.0"
   }
 }
