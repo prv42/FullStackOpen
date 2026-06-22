@@ -18,6 +18,9 @@ const App = () => {
     personService
       .getAll()
       .then(initialPersons => setPersons(initialPersons))
+      .catch(() => {
+        showNotification("Failed to load phonebook from server", "error")
+      })
   }, [])
 
   const showNotification = (content, type) => {
@@ -47,8 +50,12 @@ const App = () => {
             showNotification(`Updated ${returnedPerson.name}`, "success")
           })
           .catch(() => {
-            setPersons(prev => prev.filter(p => p.id !== person.id))
-            showNotification(`Information of ${person.name} has already been removed from server`, "error")
+            if (error.response && error.response.status === 404) {
+              setPersons(prev => prev.filter(p => p.id !== person.id))
+              showNotification(`Information of ${person.name} has already been removed`, "error")
+            } else {
+              showNotification(error.response.data.error, "error")
+            }
           })
       }
       return
@@ -62,6 +69,9 @@ const App = () => {
         setNewNumber("")
         showNotification(`Added ${returnedPerson.name}`, "success")
       })
+      .catch(error => {
+        showNotification(error.response.data.error, "error")
+      })
   }
 
   const handleNameChange = event => setNewName(event.target.value)
@@ -73,6 +83,9 @@ const App = () => {
       personService
         .deletePerson(person.id)
         .then(() => setPersons(prev => prev.filter(p => p.id !== person.id)))
+        .catch(() => {
+          showNotification(`Failed to delete ${person.name}`, "error")
+        })
     }
   }
 
