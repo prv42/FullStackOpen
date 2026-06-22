@@ -23,11 +23,20 @@ app.get("/api/persons", (request, response, next) => {
 
 app.post("/api/persons", (request, response, next) => {
   const { name, number } = request.body
-  const person = new Person({name, number})
 
-  person.save()
-    .then(savedPerson => {
-      response.status(201).json(savedPerson)
+  Person.findOne({ name })
+    .then(existing => {
+      if (existing) {
+        response.status(400).json({ error: "name must be unique" })
+      } else {
+        const person = new Person({name, number})
+
+        person.save()
+          .then(savedPerson => {
+            response.status(201).json(savedPerson)
+          })
+          .catch(error => next(error))
+      }
     })
     .catch(error => next(error))
 })

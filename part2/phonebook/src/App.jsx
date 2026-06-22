@@ -49,12 +49,16 @@ const App = () => {
             setNewNumber("")
             showNotification(`Updated ${returnedPerson.name}`, "success")
           })
-          .catch(() => {
-            if (error.response && error.response.status === 404) {
-              setPersons(prev => prev.filter(p => p.id !== person.id))
-              showNotification(`Information of ${person.name} has already been removed`, "error")
+          .catch(error => {
+            if (error.response) {
+              if (error.response.status === 404) {
+                setPersons(prev => prev.filter(p => p.id !== person.id))
+                showNotification(`Information of ${person.name} has already been removed`, "error")
+              } else {
+                showNotification(error.response.data.error, "error")
+              }
             } else {
-              showNotification(error.response.data.error, "error")
+              showNotification("Could not reach the server", "error")
             }
           })
       }
@@ -70,7 +74,11 @@ const App = () => {
         showNotification(`Added ${returnedPerson.name}`, "success")
       })
       .catch(error => {
-        showNotification(error.response.data.error, "error")
+        if (error.response) {
+          showNotification(error.response.data.error, "error")
+        } else {
+          showNotification("Could not reach the server", "error")
+        }
       })
   }
 
