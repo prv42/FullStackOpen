@@ -128,6 +128,73 @@ describe('deletion of a blog', () => {
   })
 })
 
+describe('updating a blog', () => {
+  test('the likes of a blog can be updated', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToUpdate = blogsAtStart[0]
+
+    const updatedData = { ...blogToUpdate, likes: blogToUpdate.likes + 10 }
+
+    const response = await api
+      .put(`/api/blogs/${blogToUpdate.id}`)
+      .send(updatedData)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    assert.strictEqual(response.body.likes, blogToUpdate.likes + 10)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    const updatedBlog = blogsAtEnd.find(b => b.id === blogToUpdate.id)
+    assert.strictEqual(updatedBlog.likes, blogToUpdate.likes + 10)
+  })
+
+  test('all fields of a blog can be updated', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToUpdate = blogsAtStart[0]
+
+    const newData = {
+      title: 'updated title',
+      author: 'updated author',
+      url: 'https://example.com/updated',
+      likes: 999,
+    }
+
+    const response = await api
+      .put(`/api/blogs/${blogToUpdate.id}`)
+      .send(newData)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    assert.strictEqual(response.body.title, newData.title)
+    assert.strictEqual(response.body.author, newData.author)
+    assert.strictEqual(response.body.url, newData.url)
+    assert.strictEqual(response.body.likes, newData.likes)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    const updatedBlog = blogsAtEnd.find(b => b.id === blogToUpdate.id)
+    assert.strictEqual(updatedBlog.title, newData.title)
+    assert.strictEqual(updatedBlog.author, newData.author)
+    assert.strictEqual(updatedBlog.url, newData.url)
+    assert.strictEqual(updatedBlog.likes, newData.likes)
+  })
+
+  test('updating a non-existing but valid id returns 404', async () => {
+    const validNonExistingId = await helper.nonExistingId()
+
+    await api
+      .put(`/api/blogs/${validNonExistingId}`)
+      .send({ likes: 42 })
+      .expect(404)
+  })
+
+  test('updating with a malformed id returns 400', async () => {
+    await api
+      .put('/api/blogs/not-a-valid-id')
+      .send({ likes: 42 })
+      .expect(400)
+  })
+})
+
 after(async () => {
   await mongoose.connection.close()
 })
